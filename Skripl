@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет поездок и расхода топлива</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f8f8;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        select:focus, input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .result {
+            font-size: 18px;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .green {
+            color: #28a745;
+        }
+        .red {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Калькулятор поездки</h2>
+    
+    <div class="form-group">
+        <label>Коэффициент спроса:</label>
+        <select id="demandMultiplier">
+            <option value="1.0">1.0</option>
+            <option value="1.1">1.1</option>
+            <option value="1.2">1.2</option>
+            <option value="1.3">1.3</option>
+            <option value="1.4">1.4</option>
+            <option value="1.5">1.5</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Расстояние (км):</label>
+        <select id="tripDistance">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Тариф:</label>
+        <select id="tariff">
+            <option value="standard">Стандарт</option>
+            <option value="comfort">Комфорт</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Расход топлива (л/100 км):</label>
+        <input type="number" id="fuelConsumption" value="8" step="0.1">
+    </div>
+
+    <div class="form-group">
+        <label>Цена топлива (грн/л):</label>
+        <input type="number" id="fuelPrice" value="55" step="0.1">
+    </div>
+
+    <button class="btn" onclick="calculate()">Рассчитать</button>
+
+    <div class="result">Стоимость поездки: <span id="tripCost" class="green">-</span> грн</div>
+    <div class="result">Стоимость топлива: <span id="fuelCost" class="red">-</span> грн</div>
+    <div class="result">Чистая прибыль: <span id="netProfit" class="green">-</span> грн</div>
+</div>
+
+<script>
+    const demandMultiplier = document.getElementById('demandMultiplier');
+    const tripDistance = document.getElementById('tripDistance');
+    const tariff = document.getElementById('tariff');
+    const fuelConsumption = document.getElementById('fuelConsumption');
+    const fuelPrice = document.getElementById('fuelPrice');
+    const tripCost = document.getElementById('tripCost');
+    const fuelCost = document.getElementById('fuelCost');
+    const netProfit = document.getElementById('netProfit');
+
+    const tariffs = {
+        standard: { city: { base: 60, additional: 13.3 }, suburb: 14.3 },
+        comfort: { city: { base: 65, additional: 14.5 }, suburb: 16.7 }
+    };
+
+    function calculate() {
+        const multiplier = parseFloat(demandMultiplier.value);
+        const distance = parseInt(tripDistance.value);
+        const selectedTariff = tariff.value;
+        const tariffData = tariffs[selectedTariff];
+
+        const cityBaseCost = tariffData.city.base;
+        const cityAdditionalCost = tariffData.city.additional;
+        const cityTripCost = cityBaseCost + (distance - 2) * cityAdditionalCost;
+        const tripCostValue = cityTripCost * multiplier;
+
+        const fuelConsumptionPer100Km = parseFloat(fuelConsumption.value);
+        const fuelPricePerLiter = parseFloat(fuelPrice.value);
+        const fuelUsedValue = (distance * fuelConsumptionPer100Km) / 100;
+        const fuelCostValue = fuelUsedValue * fuelPricePerLiter;
+
+        const amortization = distance * 2;
+        const uklonCommission = 0.23;
+        const driverProfitValue = tripCostValue * (1 - uklonCommission) - amortization - fuelCostValue;
+
+        tripCost.textContent = tripCostValue.toFixed(2);
+        fuelCost.textContent = fuelCostValue.toFixed(2);
+        netProfit.textContent = driverProfitValue.toFixed(2);
+    }
+</script>
+
+</body>
+</html>
